@@ -1,0 +1,13 @@
+{
+  "name": "asset-rebalancer",
+  "version": "1.0.0",
+  "description": "An asset rebalancer script",
+  "main": "main.ts",
+  "author": "Luca Visentin <luck.visentin@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "packageManager": "yarn@4.1.1"
+}
