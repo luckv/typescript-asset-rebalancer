@@ -66,6 +66,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tsconfig/node20@npm:^20.1.4":
+  version: 20.1.4
+  resolution: "@tsconfig/node20@npm:20.1.4"
+  checksum: 10c0/239cd6abaceaaffc758e7a9dd3748ec1acfdabd6de28a9a16a3824c21f17ad69a16184870298460345d2fb6f3663d092c21d5b764bef669a179658b4a7eac739
+  languageName: node
+  linkType: hard
+
 "acorn-walk@npm:^8.1.1":
   version: 8.3.2
   resolution: "acorn-walk@npm:8.3.2"
@@ -93,6 +100,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "asset-rebalancer@workspace:."
   dependencies:
+    "@tsconfig/node20": "npm:^20.1.4"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.4.5"
   languageName: unknown
