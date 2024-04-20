@@ -5,8 +5,13 @@
   "main": "main.ts",
   "author": "Luca Visentin <luck.visentin@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "start:ts-node": "ts-node src/main.ts"
+  },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
+    "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
