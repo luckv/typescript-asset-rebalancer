@@ -1,3 +1,5 @@
+#!/usr/bin/env ts-node
+
 import assert from "node:assert";
 
 /**
