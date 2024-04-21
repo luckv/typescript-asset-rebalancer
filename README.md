@@ -30,7 +30,7 @@ This script requires node and yarn. I assume you are familiar with node, or at l
 
 Clone this repository, and at the root of the repository run `yarn install` in a terminal.
 
-That's it.
+That's it 🚀
 
 ### Script run
 
@@ -50,5 +50,3 @@ In the `package.json` are located two scripts to run the application, one that u
 # Transpile and run
 > yarn start:node-dev
 ```
-
-
