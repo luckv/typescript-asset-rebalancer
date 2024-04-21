@@ -115,6 +115,26 @@ function rebalanceWithoutNegativeRebalancing(sumInitial: number, allocInitial: r
     return sumDivided;
 }
 
+function displayResults(inputs: readonly Allocation[], sumsDivided: readonly number[], allocInitial: readonly number[]) {
+
+    assert(inputs.length === sumsDivided.length && allocInitial.length === inputs.length, "Arguments must be arrays with same length")
+
+    const allocFinalSums = inputs.map((input, index) => input.value + sumsDivided[index])
+    const sumFinal = kahanSum(allocFinalSums);
+    const allocFinal = allocFinalSums.map((value) => value / sumFinal)
+
+    console.log(`Final sum: ${sumFinal}`)
+    console.table(inputs.map((input, index) => ({
+        name: input.name,
+        sumToAdd: truncate(sumsDivided[index], 2),
+        sumFinal: truncate(allocFinalSums[index], 2),
+        allocationTarget: input.allocationTarget,
+        allocationInitial: truncate(allocInitial[index], 3),
+        allocationFinal: truncate(allocFinal[index], 3),
+    })))
+
+}
+
 type Allocation = { name: string, value: number; allocationTarget: number }
 
 function main(){
@@ -146,41 +166,14 @@ function main(){
     console.log(`Sum to add: ${sumToAdd}`)
 
     const sumsDivided = rebalance(sumInitial, allocInitial, allocTargets, sumToAdd)
-
-    const allocFinalSums = allocInitialSums.map((value, index) => value + sumsDivided[index])
-    const sumFinal = kahanSum(allocFinalSums);
-    const allocFinal = allocFinalSums.map((value, index) => value / sumFinal)
-
     console.log()
     console.log(`------ Results with negative rebalancings ------`)
-    console.log(`Final sum: ${sumFinal}`)
-    console.table(inputs.map((input, index) => ({
-        name: input.name,
-        sumToAdd: truncate(sumsDivided[index], 2),
-        sumFinal: truncate(allocFinalSums[index], 2),
-        allocationTarget: input.allocationTarget,
-        allocationInitial: truncate(allocInitial[index], 3),
-        allocationFinal: truncate(allocFinal[index], 3),
-    })))
+    displayResults(inputs, sumsDivided, allocInitial)
 
     const sumDividedWithoutNegativeRebalancings = rebalanceWithoutNegativeRebalancing(sumInitial, allocInitial, allocTargets, sumToAdd)
-
-    const allocFinalSumsWithoutNegativeRebalancings = allocInitialSums.map((value, index) => value + sumDividedWithoutNegativeRebalancings[index])
-    const sumFinalWithoutNegativeRebalancings = kahanSum(allocFinalSumsWithoutNegativeRebalancings);
-    const allocFinalWithoutNegativeRebalancings = allocFinalSumsWithoutNegativeRebalancings.map((value, index) => value / sumFinalWithoutNegativeRebalancings)
-
     console.log()
     console.log(`------ Results without negative rebalancings ------`)
-    console.log(`Final sum: ${sumFinalWithoutNegativeRebalancings}`)
-    console.table(inputs.map((input, index) => ({
-        name: input.name,
-        sumToAdd: truncate(sumDividedWithoutNegativeRebalancings[index], 2),
-        sumFinal: truncate(allocFinalSumsWithoutNegativeRebalancings[index], 2),
-        allocationTarget: input.allocationTarget,
-        allocationInitial: truncate(allocInitial[index], 3),
-        allocationFinal: truncate(allocFinalWithoutNegativeRebalancings[index], 3)
-    })))
-
+    displayResults(inputs, sumDividedWithoutNegativeRebalancings, allocInitial)
 }
 
 main()
