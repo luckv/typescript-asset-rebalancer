@@ -154,7 +154,7 @@ function main(){
     //Check data are valid
     assert(inputs.length >= 2, "Allocation must be composed at least 2 elements");
     assert(inputs.every(s => s.value >= 0), "Initial allocated values can't be < 0")
-    assert(inputs.every(s => s.allocationTarget >= 0 && s.allocationTarget <= 1), "Allocation target values must be beetween 0 and 1, inclusive")
+    assert(inputs.every(s => s.allocationTarget >= 0 && s.allocationTarget <= 1), "Allocation target values must be between 0 and 1, inclusive")
     assert(kahanSum(allocTargets) === 1.0, `Allocation targets sum must be 1. Is ${kahanSum(allocTargets)}`)
     assert(sumToAdd > 0, "Sum to add must be > 0")
 
