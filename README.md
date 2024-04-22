@@ -1,8 +1,6 @@
 Calculate how to divide a sum entering an investement, between all assets with different allocations. The initial sums may not be already in a balanced allocation.
 
-My objective was to add money to the investment without selling any existing asset. I wanted to find an algorithm that didn't include negative rebalancings. Durying my work I also found a way to calculate how to remove a sum and keeping the target allocation at the same time.
-
-
+My objective was to add money to the investment without selling any existing asset. I wanted to find an algorithm that didn't include negative rebalancings. Durying my work I also found a way to calculate how to remove a sum and moving towards the target allocation at the same time.
 
 ## Usage
 
