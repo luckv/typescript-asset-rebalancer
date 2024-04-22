@@ -32,6 +32,11 @@ function truncate(x: number, decimals?: number): number {
     return Math.trunc(x * tenPow) / tenPow;
 }
 
+function calculateAllocation(arr: readonly number[]): number[] {
+    const sum = kahanSum(arr);
+    return arr.map(v => v / sum);
+}
+
 /**
  * Calculate the rebalance of `initialSum` while adding `sumToAdd`
  * @param sumInitial The initial value of the sum
@@ -59,62 +64,13 @@ function rebalance(sumInitial: number, allocInitial: readonly number[], allocTar
  * @returns A subdivision of `sumToAdd` that permits to rebalance `sumInitial` while adding `sumToAdd`. Contains only values >= 0, meaning that no asset has to be sold.
  */
 function rebalanceWithoutNegativeRebalancing(sumInitial: number, allocInitial: readonly number[], allocTargets: readonly number[], sumToAdd: number): number[] {
+    const sumFinal = sumInitial + sumToAdd;
+    const sumFinalDivided = allocTargets.map(a => a * sumFinal)
+    const sumFinalDividedDiffInitial = sumFinalDivided.map((s, i) => s - allocInitial[i] * sumInitial).map(s => s < 0 ? 0 : s)
 
-    // Calculate a subdivision of `sumToAdd`, but keep track of the negative rebalancings and the indexes that remains > 0
-    let sumNegativeRebalacings = 0
-    const indexesRedistribution = new Set<number>()
-    const sumDivided = new Array<number>(allocTargets.length).fill(NaN)
-    allocTargets.forEach((value, index) => {
+    const diffAllocation = calculateAllocation(sumFinalDividedDiffInitial);
 
-        // Calculate the subdivison of `sumToAdd` adding the rebalancing (positive or negative) to make `sumInitial` subdivided like `allocTargets`
-        const sumToAddSuddivision = ((value - allocInitial[index]) * sumInitial) + (value * sumToAdd);
-
-        if (sumToAddSuddivision <= 0) {
-            // Keep track of the negative subdivision. The result of the subdivision is already 0
-            sumDivided[index] = 0;
-            sumNegativeRebalacings += sumToAddSuddivision;
-        } else {
-            // Save the positive subdivision, and keep track of the index that will be used to rebalance the negative subdivisions
-            sumDivided[index] = sumToAddSuddivision;
-            indexesRedistribution.add(index)
-        }
-    })
-
-    if (sumNegativeRebalacings < 0) {
-        // Redistribute negative rebalancings to other assets
-
-        let reimainingToDistribute = sumNegativeRebalacings;
-
-        while (reimainingToDistribute < 0 && indexesRedistribution.size > 0) {
-            //At every loop divide evenly the remaining sum to distribute to all redistribution indexes
-            const remainingSingleRedistributedRebalancing = reimainingToDistribute / indexesRedistribution.size;
-
-            for (const indexToRedistribute of indexesRedistribution) {
-                // Calculate the effect of distribution
-                const distributeEffect = sumDivided[indexToRedistribute] + remainingSingleRedistributedRebalancing;
-
-                if (distributeEffect >= 0) {
-                    // The distribution isn't negative and can be applied
-                    sumDivided[indexToRedistribute] = distributeEffect;
-                    // Reduce remaining value to distribute
-                    reimainingToDistribute -= remainingSingleRedistributedRebalancing
-                } else {
-                    // The distribution is negative and subdivision of `sumToAdd` is 0
-                    sumDivided[indexToRedistribute] = 0;
-                    // Reduce remaining value to distribute, but only by the difference
-                    reimainingToDistribute -= (remainingSingleRedistributedRebalancing - distributeEffect)
-                }
-
-                // Remove indexes from the set of indexes used for redistribution, if its relative subdivision is no more positive
-                if (sumDivided[indexToRedistribute] <= 0) indexesRedistribution.delete(indexToRedistribute)
-
-                // Exit the for if the remaining quantity to redistribute is no longer negative
-                if (reimainingToDistribute >= 0) break;
-            }
-        }
-    }
-
-    return sumDivided;
+    return diffAllocation.map(d => d * sumToAdd);
 }
 
 function displayResults(inputs: readonly Allocation[], sumsDivided: readonly number[], allocInitial: readonly number[]) {
