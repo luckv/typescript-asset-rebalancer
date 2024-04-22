@@ -67,6 +67,9 @@ function rebalance(sumInitial: number, allocInitial: readonly number[], allocTar
 function rebalanceWithoutNegativeRebalancing(sumsInitial: readonly number[], allocTargets: readonly number[], sumToAdd: number): number[] {
     assert(sumsInitial.length === allocTargets.length, "Arguments must be arrays with same length")
 
+    // If there is no sum to add or remove, return array of zero
+    if (sumToAdd === 0) return new Array(sumsInitial.length).fill(0)
+
     const [sumInitial, allocInitial] = calculateAllocation(sumsInitial);
 
     const sumFinal = sumInitial + sumToAdd;
