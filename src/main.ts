@@ -58,7 +58,7 @@ function rebalance(sumInitial: number, allocInitial: readonly number[], allocTar
 }
 
 /**
- * Calculate the rebalance of `initialSum` while adding `sumToAdd`, but without selling assets.
+ * Calculate the rebalance of `initialSum` while adding `sumToAdd`, but without selling assets if sumToAdd is positive, or buying assets if sumToAdd is negative.
  * @param sumsInitial The initial sums of each asset
  * @param allocTargets The target allocation. Array of numbers between 0 and 1, inclusive
  * @param sumToAdd The value to add to `initialSum`
@@ -73,11 +73,23 @@ function rebalanceWithoutNegativeRebalancing(sumsInitial: readonly number[], all
     const [sumInitial, allocInitial] = calculateAllocation(sumsInitial);
 
     const sumFinal = sumInitial + sumToAdd;
+    //Calculate how should be divided the final sum to satisfy the target allocation
     const sumFinalDivided = allocTargets.map(a => a * sumFinal)
-    const sumFinalDividedDiffInitial = sumFinalDivided.map((s, i) => s - allocInitial[i] * sumInitial).map(s => s < 0 ? 0 : s)
 
+    // Calculate how much money to add (buy) or remove (sell) from each asset, to reach the target allocation of the final sum
+    // If sum to add is positive, the sum of all the buying to do on all assets is >= sumToAdd, because there could be at least one asset with a negative rebalancing that redistribute its asset value to the positive columns
+    // Similarly if the sum to add is negative, the sum of all the selling to do on all assets is <= sumToAdd, because there could be at least one asset with a positive rebalancing that acquire its asset value from the negative columns
+    // In the end we obtain an array of values, all >=0 if sumToAdd >=0, or all <= 0 if sumToAdd <= 0
+    const sumFinalDividedDiffInitial = sumFinalDivided
+        // Calculate diff between target allocation of final sum, and allocation of initial sum, to find where to add or remove money
+        .map<number>((s, i) => s - allocInitial[i] * sumInitial)
+        // If sumToAdd > 0 must put to 0 where the diff is negative, otherwise if sumToAdd is < 0 put 0 where the diff is positive
+        .map<number>(sumToAdd > 0 ? (s => s < 0 ? 0 : s) : (s => s > 0 ? 0 : s))
+
+    //Calculate how the diffs are allocated relative to their sum
     const [_, diffAllocation] = calculateAllocation(sumFinalDividedDiffInitial);
 
+    // Apply the relative allocations to the sum to add
     return diffAllocation.map(d => d * sumToAdd);
 }
 
@@ -108,7 +120,7 @@ function main(){
     // Edit `inputs` and `sumToAdd` and then execute the script
 
     const inputs: readonly Allocation[] = [
-        {name: "Etf azionari", value: 6000, allocationTarget: 0.3},
+        {name: "Etf azionari", value: 60000, allocationTarget: 0.3},
         {name: "Fondi pensione", value: 5000, allocationTarget: 0.5},
         {name: "Obbligazioni", value: 6000, allocationTarget: 0.2},
     ];
@@ -117,15 +129,15 @@ function main(){
     const allocInitialSums = inputs.map(i => i.value)
     const allocTargets = inputs.map(i => i.allocationTarget)
 
+    const sumInitial = kahanSum(allocInitialSums);
+    const allocInitial = allocInitialSums.map((value) => value / sumInitial)
+
     //Check data are valid
     assert(inputs.length >= 2, "Allocation must be composed at least 2 elements");
     assert(inputs.every(s => s.value >= 0), "Initial allocated values can't be < 0")
     assert(inputs.every(s => s.allocationTarget >= 0 && s.allocationTarget <= 1), "Allocation target values must be between 0 and 1, inclusive")
     assert(kahanSum(allocTargets) === 1.0, `Allocation targets sum must be 1. Is ${kahanSum(allocTargets)}`)
-    assert(sumToAdd > 0, "Sum to add must be > 0")
-
-    const sumInitial = kahanSum(allocInitialSums);
-    const allocInitial = allocInitialSums.map((value) => value / sumInitial)
+    assert(sumToAdd + sumInitial >= 0, "The final sum must be > 0")
 
     console.log(`Initial allocated sums (total: ${sumInitial})`)
     console.table(inputs)

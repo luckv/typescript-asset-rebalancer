@@ -1,6 +1,8 @@
 Calculate how to divide a sum entering an investement, between all assets with different allocations. The initial sums may not be already in a balanced allocation.
 
-My objective was to add money to the investment without selling any existing asset. I wanted to find an algorithm that didn't include negative rebalancings.
+My objective was to add money to the investment without selling any existing asset. I wanted to find an algorithm that didn't include negative rebalancings. Durying my work I also found a way to calculate how to remove a sum and keeping the target allocation at the same time.
+
+
 
 ## Usage
 
@@ -10,9 +12,9 @@ The script does not accept arguments and the inputs are hardcoded in the code. S
 
 Edit the initial part of the `main()` function to change the inputs. Inputs are:
 
-- An array were every element represent one asset, the current allocated value (`value` field) and the allocation target, are the data required. 
+- An array were every element represent one asset, the current allocated value (`value` field) and the allocation target, are the data required. A name of the asset is added for clarity when printing the results.
 
-- The sum we are going to add in the investment
+- The sum we are going to add in the investment, can be positive (buying) or negative (selling)
 
 <img src='./docs/inputs.png' />
 
