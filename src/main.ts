@@ -105,9 +105,9 @@ function main(){
     // Edit `inputs` and `sumToAdd` and then execute the script
 
     const inputs: readonly Allocation[] = [
-        {name: "Etf azionari", value: 6000, allocationTarget: 0.7},
-        {name: "Fondi pensione", value: 5000, allocationTarget: 0.2},
-        {name: "Obbligazioni", value: 3000, allocationTarget: 0.1},
+        {name: "Etf azionari", value: 6000, allocationTarget: 0.3},
+        {name: "Fondi pensione", value: 5000, allocationTarget: 0.5},
+        {name: "Obbligazioni", value: 6000, allocationTarget: 0.2},
     ];
     const sumToAdd = 10000;
 
