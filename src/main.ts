@@ -32,9 +32,9 @@ function truncate(x: number, decimals?: number): number {
     return Math.trunc(x * tenPow) / tenPow;
 }
 
-function calculateAllocation(arr: readonly number[]): number[] {
+function calculateAllocation(arr: readonly number[]): [number, number[]] {
     const sum = kahanSum(arr);
-    return arr.map(v => v / sum);
+    return [sum, arr.map(v => v / sum)];
 }
 
 /**
@@ -46,6 +46,8 @@ function calculateAllocation(arr: readonly number[]): number[] {
  * @returns A subdivision of `sumToAdd` that permits to rebalance `sumInitial` while adding `sumToAdd`. Can contains negative values, meaning that asset must be sold.
  */
 function rebalance(sumInitial: number, allocInitial: readonly number[], allocTargets: readonly number[], sumToAdd: number): number[] {
+    assert(allocInitial.length === allocTargets.length, "Arguments must be arrays with same length")
+
     return allocTargets.map<number>((value, index) => {
         // Calculate the subdivison of `sumToAdd` adding the rebalancing (positive or negative) to make `sumInitial` subdivided like `allocTargets`
         // First calculate how to rebalance `initialSum`, then apply the balanced allocation to `sumToAdd`
@@ -57,18 +59,21 @@ function rebalance(sumInitial: number, allocInitial: readonly number[], allocTar
 
 /**
  * Calculate the rebalance of `initialSum` while adding `sumToAdd`, but without selling assets.
- * @param sumInitial The initial value of the sum
- * @param allocInitial The initial allocation of the sum. Array of numbers between 0 and 1, inclusive
+ * @param sumsInitial The initial sums of each asset
  * @param allocTargets The target allocation. Array of numbers between 0 and 1, inclusive
  * @param sumToAdd The value to add to `initialSum`
  * @returns A subdivision of `sumToAdd` that permits to rebalance `sumInitial` while adding `sumToAdd`. Contains only values >= 0, meaning that no asset has to be sold.
  */
-function rebalanceWithoutNegativeRebalancing(sumInitial: number, allocInitial: readonly number[], allocTargets: readonly number[], sumToAdd: number): number[] {
+function rebalanceWithoutNegativeRebalancing(sumsInitial: readonly number[], allocTargets: readonly number[], sumToAdd: number): number[] {
+    assert(sumsInitial.length === allocTargets.length, "Arguments must be arrays with same length")
+
+    const [sumInitial, allocInitial] = calculateAllocation(sumsInitial);
+
     const sumFinal = sumInitial + sumToAdd;
     const sumFinalDivided = allocTargets.map(a => a * sumFinal)
     const sumFinalDividedDiffInitial = sumFinalDivided.map((s, i) => s - allocInitial[i] * sumInitial).map(s => s < 0 ? 0 : s)
 
-    const diffAllocation = calculateAllocation(sumFinalDividedDiffInitial);
+    const [_, diffAllocation] = calculateAllocation(sumFinalDividedDiffInitial);
 
     return diffAllocation.map(d => d * sumToAdd);
 }
@@ -128,7 +133,7 @@ function main(){
     console.log(`------ Results with negative rebalancings ------`)
     displayResults(inputs, sumsDivided, allocInitial)
 
-    const sumDividedWithoutNegativeRebalancings = rebalanceWithoutNegativeRebalancing(sumInitial, allocInitial, allocTargets, sumToAdd)
+    const sumDividedWithoutNegativeRebalancings = rebalanceWithoutNegativeRebalancing(allocInitialSums, allocTargets, sumToAdd)
     console.log()
     console.log(`------ Results without negative rebalancings ------`)
     displayResults(inputs, sumDividedWithoutNegativeRebalancings, allocInitial)
